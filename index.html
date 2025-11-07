@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<!-- saved from url=(0063)file:///Users/nicoguyon/Downloads/bonsoirs-aps-dashboard_1.html -->
-<html lang="fr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard APS pour Bonsoirs</title>
+    <title>Dashboard Hyperpigmentation - Laboratoire ACM</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
     <style>
         * {
             margin: 0;
@@ -12,294 +14,271 @@
         }
 
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #1a2332 0%, #2c3e50 50%, #34495e 100%);
-            color: #2c3e50;
-            min-height: 100vh;
-        }
-
-        .dashboard-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            overflow-x: hidden;
         }
 
         .header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 30px;
             text-align: center;
-            margin-bottom: 50px;
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
         }
 
         .header h1 {
-            font-size: 48px;
-            color: #1a2332;
-            margin-bottom: 15px;
-            font-weight: 300;
-            letter-spacing: -1px;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
 
-        .header .subtitle {
-            font-size: 20px;
-            color: #7f8c8d;
-            font-weight: 300;
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
         }
 
-        .nav-tabs {
+        .navigation {
+            background: rgba(255,255,255,0.95);
+            padding: 15px;
             display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            background: white;
-            padding: 10px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            justify-content: center;
+            gap: 15px;
             flex-wrap: wrap;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            sticky: top;
+            top: 0;
+            z-index: 100;
         }
 
-        .nav-tab {
-            flex: 1;
-            min-width: 150px;
-            padding: 15px 20px;
-            background: #f8f9fa;
+        .nav-btn {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 25px;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: 500;
-            color: #2c3e50;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.12);
             transition: all 0.3s ease;
         }
 
-        .nav-tab:hover {
-            background: #e9ecef;
-            transform: translateY(-2px);
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
         }
 
-        .nav-tab.active {
-            background: linear-gradient(135deg, #1a2332 0%, #2c3e50 100%);
+        .card h2 {
+            color: #2a5298;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            box-shadow: 0 5px 15px rgba(26, 35, 50, 0.3);
-        }
-
-        .content-section {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
-        }
-
-        .metric-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            padding: 30px;
+            padding: 25px;
             border-radius: 15px;
             text-align: center;
-            border-left: 5px solid #1a2332;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin: 15px 0;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.2);
         }
 
-        .metric-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        .stat-number {
+            font-size: 3em;
+            font-weight: bold;
+            margin: 10px 0;
         }
 
-        .metric-value {
-            font-size: 36px;
-            font-weight: 700;
-            color: #1a2332;
-            margin-bottom: 10px;
-        }
-
-        .metric-label {
-            font-size: 14px;
-            color: #7f8c8d;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .comparison-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 30px 0;
-            overflow: hidden;
-            border-radius: 10px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-        }
-
-        .comparison-table thead {
-            background: linear-gradient(135deg, #1a2332 0%, #2c3e50 100%);
-            color: white;
-        }
-
-        .comparison-table th,
-        .comparison-table td {
-            padding: 20px;
-            text-align: left;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .comparison-table tbody tr:hover {
-            background: #f8f9fa;
-        }
-
-        .score-badge {
-            display: inline-block;
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 14px;
-        }
-
-        .score-high {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .score-medium {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .score-low {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .feature-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-            padding: 25px;
-            border-radius: 12px;
-            border-left: 4px solid #1a2332;
-        }
-
-        .feature-card h4 {
-            color: #1a2332;
-            margin-bottom: 12px;
-            font-size: 18px;
-        }
-
-        .feature-card p {
-            color: #7f8c8d;
-            line-height: 1.6;
-            font-size: 14px;
-        }
-
-        .recommendation-box {
-            background: linear-gradient(135deg, #1a2332 0%, #2c3e50 100%);
-            color: white;
-            padding: 40px;
-            border-radius: 20px;
-            margin-top: 30px;
-            box-shadow: 0 15px 50px rgba(26, 35, 50, 0.4);
-        }
-
-        .recommendation-box h3 {
-            font-size: 28px;
-            margin-bottom: 20px;
-            font-weight: 300;
-        }
-
-        .recommendation-box .highlight {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 20px;
-            border-radius: 12px;
-            margin-top: 20px;
-            border-left: 4px solid #3498db;
+        .stat-label {
+            font-size: 1.1em;
+            opacity: 0.95;
         }
 
         .chart-container {
             position: relative;
-            height: 400px;
-            margin: 30px 0;
+            height: 350px;
+            margin: 20px 0;
         }
 
-        .section-title {
-            font-size: 32px;
-            color: #1a2332;
-            margin-bottom: 30px;
-            font-weight: 300;
-            border-bottom: 3px solid #1a2332;
-            padding-bottom: 15px;
-        }
-
-        .timeline {
-            position: relative;
-            padding: 30px 0;
-            margin: 30px 0;
-        }
-
-        .timeline-item {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 40px;
-            position: relative;
-        }
-
-        .timeline-marker {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #1a2332 0%, #2c3e50 100%);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            flex-shrink: 0;
-            box-shadow: 0 5px 15px rgba(26, 35, 50, 0.3);
-        }
-
-        .timeline-content {
-            flex: 1;
-            background: #f8f9fa;
-            padding: 25px;
-            border-radius: 12px;
-        }
-
-        .timeline-content h4 {
-            color: #1a2332;
-            margin-bottom: 10px;
-        }
-
-        .benefits-list {
+        .insights-list {
             list-style: none;
             padding: 0;
         }
 
-        .benefits-list li {
+        .insights-list li {
             padding: 15px;
-            background: white;
-            margin-bottom: 10px;
+            margin: 10px 0;
+            background: linear-gradient(90deg, #f093fb20 0%, #f5576c20 100%);
+            border-left: 5px solid #f5576c;
             border-radius: 8px;
-            border-left: 4px solid #3498db;
             transition: all 0.3s ease;
         }
 
-        .benefits-list li:hover {
+        .insights-list li:hover {
             transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 8px 15px;
+            background: #667eea;
+            color: white;
+            border-radius: 20px;
+            margin: 5px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .competitor-card {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .competitor-card h3 {
+            color: #c94b4b;
+            margin-bottom: 10px;
+        }
+
+        .recommendation-box {
+            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 3px solid #667eea;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.15);
+        }
+
+        .recommendation-box h3 {
+            color: #1e3c72;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+
+        .priority-high {
+            border-left: 6px solid #f5576c;
+            background: #fff5f5;
+        }
+
+        .priority-medium {
+            border-left: 6px solid #ffa500;
+            background: #fffaf0;
+        }
+
+        .priority-low {
+            border-left: 6px solid #4caf50;
+            background: #f1f8f4;
+        }
+
+        .swot-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .swot-card {
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .swot-strengths { background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%); }
+        .swot-weaknesses { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+        .swot-opportunities { background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%); }
+        .swot-threats { background: linear-gradient(135deg, #fccb90 0%, #d57eeb 100%); }
+
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline-item {
+            padding: 20px;
+            margin: 15px 0;
+            background: white;
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background: #667eea;
+            color: white;
         }
 
         .progress-bar {
             width: 100%;
             height: 30px;
-            background: #e9ecef;
+            background: #e0e0e0;
             border-radius: 15px;
             overflow: hidden;
             margin: 10px 0;
@@ -307,464 +286,1108 @@
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, #1a2332 0%, #3498db 100%);
-            transition: width 1s ease;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
             display: flex;
             align-items: center;
-            justify-content: flex-end;
-            padding-right: 15px;
+            justify-content: center;
             color: white;
-            font-weight: 600;
-            font-size: 14px;
+            font-weight: bold;
+            transition: width 1s ease;
         }
 
-        .tab-content {
-            display: none;
+        .heatmap {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
         }
 
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.5s;
+        .heatmap-cell {
+            padding: 25px;
+            text-align: center;
+            border-radius: 12px;
+            color: white;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            cursor: pointer;
         }
 
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .heatmap-cell:hover {
+            transform: scale(1.05);
         }
+
+        .heat-very-high { background: #d32f2f; }
+        .heat-high { background: #f57c00; }
+        .heat-medium { background: #fbc02d; }
+        .heat-low { background: #7cb342; }
+        .heat-very-low { background: #0097a7; }
 
         @media (max-width: 768px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .swot-grid {
+                grid-template-columns: 1fr;
+            }
             .header h1 {
-                font-size: 32px;
+                font-size: 1.8em;
             }
-            
-            .nav-tabs {
-                flex-direction: column;
-            }
-            
-            .nav-tab {
-                width: 100%;
-            }
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .innovation-score {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: linear-gradient(90deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 10px;
+            color: white;
+            margin: 10px 0;
+        }
+
+        .key-metric {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            margin: 15px 0;
+        }
+
+        .key-metric-value {
+            font-size: 2.5em;
+            font-weight: bold;
+        }
+
+        .key-metric-label {
+            font-size: 1.1em;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <div class="header">
-            <h1>APS Supply Chain pour Bonsoirs</h1>
-            <p class="subtitle">Étude stratégique : Choisir le bon système de planification avancée avec IA générative</p>
-        </div>
+    <div class="header">
+        <h1>🔬 Dashboard Stratégique Hyperpigmentation</h1>
+        <p>Analyse du marché pour le Laboratoire ACM - Décisions Data-Driven</p>
+    </div>
 
-        <div class="nav-tabs" id="navTabs">
-            <button class="nav-tab active" onclick="showTab(&#39;contexte&#39;)">🏢 Contexte</button>
-            <button class="nav-tab" onclick="showTab(&#39;besoins&#39;)">🎯 Besoins</button>
-            <button class="nav-tab" onclick="showTab(&#39;comparaison&#39;)">📊 Comparaison</button>
-            <button class="nav-tab" onclick="showTab(&#39;ia&#39;)">🤖 IA Générative</button>
-            <button class="nav-tab" onclick="showTab(&#39;recommandation&#39;)">⭐ Recommandation</button>
-        </div>
+    <div class="navigation">
+        <button class="nav-btn active" onclick="showSection('overview')">📊 Vue d'ensemble</button>
+        <button class="nav-btn" onclick="showSection('market')">🌍 Marché Global</button>
+        <button class="nav-btn" onclick="showSection('innovation')">💡 Innovations</button>
+        <button class="nav-btn" onclick="showSection('competition')">🎯 Concurrence</button>
+        <button class="nav-btn" onclick="showSection('strategy')">🚀 Stratégie ACM</button>
+        <button class="nav-btn" onclick="showSection('regions')">🗺️ Analyse Régionale</button>
+    </div>
 
-        <div class="content-section">
-            <!-- CONTEXTE -->
-            <div id="contexte" class="tab-content active">
-                <h2 class="section-title">Contexte Bonsoirs</h2>
-                
-                <div class="metrics-grid">
-                    <div class="metric-card">
-                        <div class="metric-value">2017</div>
-                        <div class="metric-label">Année de création</div>
+    <div class="container">
+        <!-- SECTION 1: VUE D'ENSEMBLE -->
+        <div id="overview" class="section active">
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h2>📈 Marché Global</h2>
+                    <div class="stat-box">
+                        <div class="stat-label">Valeur du marché 2022</div>
+                        <div class="stat-number">8,8 Mds $</div>
                     </div>
-                    <div class="metric-card">
-                        <div class="metric-value">40-50M€</div>
-                        <div class="metric-label">CA estimé 2025</div>
+                    <div class="stat-box" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <div class="stat-label">Prévision 2030</div>
+                        <div class="stat-number">15,7 Mds $</div>
                     </div>
-                    <div class="metric-card">
-                        <div class="metric-value">3x</div>
-                        <div class="metric-label">Croissance CA 2020</div>
-                    </div>
-                    <div class="metric-card">
-                        <div class="metric-value">DNVB</div>
-                        <div class="metric-label">Modèle d'affaires</div>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <div class="tag">CAGR: +7.8%</div>
+                        <div class="tag">Croissance soutenue</div>
                     </div>
                 </div>
 
-                <div class="timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-marker">1</div>
-                        <div class="timeline-content">
-                            <h4>Gestion artisanale (2017-2022)</h4>
-                            <p>Excel et Google Drive pour piloter la supply chain. Limites atteintes avec la croissance rapide et la multiplication des fournisseurs internationaux.</p>
-                        </div>
+                <div class="card">
+                    <h2>👥 Impact Consommateur</h2>
+                    <div class="key-metric">
+                        <div class="key-metric-value">50%</div>
+                        <div class="key-metric-label">Souffrent d'hyperpigmentation</div>
                     </div>
-                    <div class="timeline-item">
-                        <div class="timeline-marker">2</div>
-                        <div class="timeline-content">
-                            <h4>Transformation digitale (2023)</h4>
-                            <p>Déploiement de Winddle pour la collaboration fournisseurs et le suivi opérationnel. Centralisation des informations et gains de visibilité.</p>
-                        </div>
+                    <div class="key-metric" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <div class="key-metric-value">33%</div>
+                        <div class="key-metric-label">Impact négatif sur qualité de vie</div>
                     </div>
-                    <div class="timeline-item">
-                        <div class="timeline-marker">3</div>
-                        <div class="timeline-content">
-                            <h4>Prochaine étape : APS (2025)</h4>
-                            <p>Investissement dans un système de planification avancée avec IA générative pour optimiser prévisions, stocks et réapprovisionnements.</p>
-                        </div>
+                    <div class="key-metric" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                        <div class="key-metric-value">44%</div>
+                        <div class="key-metric-label">Cherchent à dissimuler</div>
                     </div>
                 </div>
 
-                <div class="features-grid">
-                    <div class="feature-card">
-                        <h4>🌍 Supply Chain Internationale</h4>
-                        <p>Sourcing de coton en France, Moyen-Orient et Inde. Production en France (Vosges), Portugal et Turquie. Complexité multi-pays à gérer.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h4>📈 Croissance Forte</h4>
-                        <p>Rentable dès 2019, triplement du CA en 2020. Nécessité d'outils évolutifs pour accompagner la croissance future.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h4>🎯 Qualité Premium</h4>
-                        <p>Linge de maison haut de gamme avec exigence de qualité. Gestion de multiples références (SKU) et variantes produits.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- BESOINS -->
-            <div id="besoins" class="tab-content">
-                <h2 class="section-title">Besoins Identifiés</h2>
-                
-                <ul class="benefits-list">
-                    <li>
-                        <strong>📊 Prévisions de demande précises</strong>
-                        <p style="margin-top: 8px; color: #7f8c8d">Prévoir la demande au niveau SKU pour éviter ruptures et surstocks. Gestion de la saisonnalité du linge de maison.</p>
-                    </li>
-                    <li>
-                        <strong>📦 Calcul des besoins d'approvisionnement</strong>
-                        <p style="margin-top: 8px; color: #7f8c8d">Recommandations de commandes tenant compte des délais longs (textile asiatique), MOQ et contraintes fournisseurs.</p>
-                    </li>
-                    <li>
-                        <strong>💰 Optimisation des stocks</strong>
-                        <p style="margin-top: 8px; color: #7f8c8d">Stocks de sécurité adaptés, rotation optimale pour minimiser le capital immobilisé tout en assurant le service.</p>
-                    </li>
-                    <li>
-                        <strong>🎭 Simulations de scénarios</strong>
-                        <p style="margin-top: 8px; color: #7f8c8d">Évaluer l'impact de retards fournisseurs ou pics de demande. Planification "what-if" pour anticiper les aléas.</p>
-                    </li>
-                    <li>
-                        <strong>🤝 Coordination collaborative</strong>
-                        <p style="margin-top: 8px; color: #7f8c8d">Partage d'informations avec fournisseurs et 3PL. Portail collaboratif pour aligner toute la chaîne.</p>
-                    </li>
-                    <li>
-                        <strong>🤖 IA Générative intégrée</strong>
-                        <p style="margin-top: 8px; color: #7f8c8d">Assistant intelligent en français, interface conversationnelle, automatisation des tâches répétitives.</p>
-                    </li>
-                </ul>
-
-                <div style="margin-top: 40px">
-                    <h3 style="color: #1a2332; margin-bottom: 20px">Critères de Sélection Prioritaires</h3>
-                    <div>
-                        <div style="margin-bottom: 20px">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px">
-                                <span>Adapté PME/ETI</span>
-                                <span style="font-weight: 700">95%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 95%">95%</div>
-                            </div>
-                        </div>
-                        <div style="margin-bottom: 20px">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px">
-                                <span>IA avancée (ML + GenAI)</span>
-                                <span style="font-weight: 700">100%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 100%">100%</div>
-                            </div>
-                        </div>
-                        <div style="margin-bottom: 20px">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px">
-                                <span>Prévisions &amp; Stocks</span>
-                                <span style="font-weight: 700">90%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 90%">90%</div>
-                            </div>
-                        </div>
-                        <div style="margin-bottom: 20px">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px">
-                                <span>Déploiement rapide</span>
-                                <span style="font-weight: 700">85%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 85%">85%</div>
-                            </div>
-                        </div>
-                        <div style="margin-bottom: 20px">
-                            <div style="display: flex; justify-content: space-between; margin-bottom: 5px">
-                                <span>Coût raisonnable</span>
-                                <span style="font-weight: 700">80%</span>
-                            </div>
-                            <div class="progress-bar">
-                                <div class="progress-fill" style="width: 80%">80%</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- COMPARAISON -->
-            <div id="comparaison" class="tab-content">
-                <h2 class="section-title">Comparaison des Solutions APS</h2>
-                
-                <div style="background: #f8f9fa; padding: 30px; border-radius: 15px; margin-bottom: 30px">
-                    <h3 style="color: #1a2332; margin-bottom: 20px; text-align: center">Comparaison Multi-critères</h3>
-                    <p style="text-align: center; color: #7f8c8d; margin-bottom: 30px">Évaluation sur 6 critères clés pour Bonsoirs</p>
-                    
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px">
-                        <div style="text-align: center; padding: 20px; background: white; border-radius: 10px">
-                            <h4 style="color: #1a2332; margin-bottom: 10px">Flowlity</h4>
-                            <div style="font-size: 48px; font-weight: 700; color: #27ae60">91</div>
-                            <div style="color: #7f8c8d">Score global</div>
-                        </div>
-                        <div style="text-align: center; padding: 20px; background: white; border-radius: 10px">
-                            <h4 style="color: #1a2332; margin-bottom: 10px">FuturMaster</h4>
-                            <div style="font-size: 48px; font-weight: 700; color: #f39c12">77</div>
-                            <div style="color: #7f8c8d">Score global</div>
-                        </div>
-                        <div style="text-align: center; padding: 20px; background: white; border-radius: 10px">
-                            <h4 style="color: #1a2332; margin-bottom: 10px">o9 Solutions</h4>
-                            <div style="font-size: 48px; font-weight: 700; color: #e74c3c">70</div>
-                            <div style="color: #7f8c8d">Score global</div>
-                        </div>
+                <div class="card">
+                    <h2>🎯 Types d'Hyperpigmentation</h2>
+                    <div class="chart-container">
+                        <canvas id="typesChart"></canvas>
                     </div>
                 </div>
 
-                <table class="comparison-table">
-                    <thead>
-                        <tr>
-                            <th>Solution</th>
-                            <th>IA / GenAI</th>
-                            <th>Taille cible</th>
-                            <th>Déploiement</th>
-                            <th>Points forts</th>
-                            <th>Adéquation</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>Flowlity</strong></td>
-                            <td><span class="score-badge score-high">AI-native</span></td>
-                            <td>PME/ETI</td>
-                            <td>Quelques semaines</td>
-                            <td>ML avancé, prévisions probabilistes, UI moderne, automatisation 95%</td>
-                            <td><span class="score-badge score-high">Excellent ⭐⭐⭐</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>FuturMaster Bloom</strong></td>
-                            <td><span class="score-badge score-high">IA intégrée</span></td>
-                            <td>Grandes entreprises</td>
-                            <td>3-6 mois</td>
-                            <td>Plateforme complète, jumeau numérique, S&amp;OP, signaux externes</td>
-                            <td><span class="score-badge score-medium">Bon ⭐⭐</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Planipe</strong></td>
-                            <td><span class="score-badge score-medium">Algorithmes propres</span></td>
-                            <td>Distribution/Retail</td>
-                            <td>2-4 mois</td>
-                            <td>Spécialisé stocks, interface intuitive, France</td>
-                            <td><span class="score-badge score-high">Très bon ⭐⭐</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>o9 Solutions</strong></td>
-                            <td><span class="score-badge score-high">Digital Brain + GenAI</span></td>
-                            <td>Multinationales</td>
-                            <td>6-12 mois</td>
-                            <td>État de l'art IA, temps réel, global scale</td>
-                            <td><span class="score-badge score-low">Surdimensionné ⭐</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>SAP IBP</strong></td>
-                            <td><span class="score-badge score-medium">ML intégré</span></td>
-                            <td>Grandes entreprises</td>
-                            <td>6-12 mois</td>
-                            <td>Suite complète, HANA, intégration SAP</td>
-                            <td><span class="score-badge score-low">Trop complexe ⭐</span></td>
-                        </tr>
-                        <tr>
-                            <td><strong>Winddle Agent IA</strong></td>
-                            <td><span class="score-badge score-medium">NLP/GenAI</span></td>
-                            <td>PME/ETI</td>
-                            <td>Déjà utilisé</td>
-                            <td>Automatisation fournisseurs, emails intelligents</td>
-                            <td><span class="score-badge score-medium">Complémentaire</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- IA GÉNÉRATIVE -->
-            <div id="ia" class="tab-content">
-                <h2 class="section-title">L'IA Générative : Catalyseur Supply Chain</h2>
-                
-                <div class="features-grid">
-                    <div class="feature-card">
-                        <h4>💬 Interface Conversationnelle</h4>
-                        <p>Poser des questions en langage naturel : "Quels produits risquent la rupture dans 4 semaines ?" L'assistant IA analyse les données et génère une réponse narrative utile.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h4>📋 Génération de Recommandations</h4>
-                        <p>L'IA formule automatiquement des plans d'approvisionnement que le planner valide/ajuste. Génération de messages aux fournisseurs en cas de perturbation.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h4>🔍 Analyse Signaux Externes</h4>
-                        <p>Les LLM surveillent l'actualité (géopolitique, météo) et alertent sur les impacts potentiels. Synthèse automatique de rapports de situation.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h4>⚡ Gain de Temps Massif</h4>
-                        <p>70% de gain sur le processus de planning hebdomadaire. 15-30% de réduction d'erreur de prévision grâce aux approches IA+LLM.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h4>🎯 Démocratisation de l'Expertise</h4>
-                        <p>Petite équipe supply chain peut rivaliser avec des structures plus grandes grâce à l'augmentation IA. Pas besoin de data analyst dédié.</p>
-                    </div>
-                    <div class="feature-card">
-                        <h4>📊 Analyse Prédictive Avancée</h4>
-                        <p>Prévisions probabilistes vs déterministes. Machine learning qui apprend en continu des patterns de demande et ajuste automatiquement.</p>
-                    </div>
-                </div>
-
-                <div style="margin-top: 40px; background: #f8f9fa; padding: 30px; border-radius: 15px">
-                    <h3 style="color: #1a2332; margin-bottom: 20px">Cas d'Usage Concrets pour Bonsoirs</h3>
-                    <ul style="list-style: none; padding: 0">
-                        <li style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #3498db">
-                            <strong>Scénario 1 :</strong> "Pourquoi la prévision de ventes des draps satinés a augmenté ce mois-ci ?" → L'IA explique l'impact de la dernière promotion (+30%) et recommande d'avancer une commande fournisseur
-                        </li>
-                        <li style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #3498db">
-                            <strong>Scénario 2 :</strong> Retard annoncé par un fournisseur indien → L'IA génère automatiquement un message de relance et propose des alternatives d'approvisionnement
-                        </li>
-                        <li style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 8px; border-left: 4px solid #3498db">
-                            <strong>Scénario 3 :</strong> Pic de demande détecté sur le linge de bain → L'IA ajuste automatiquement les stocks de sécurité et les quantités de réapprovisionnement
-                        </li>
+                <div class="card">
+                    <h2>🔑 Insights Clés</h2>
+                    <ul class="insights-list">
+                        <li><strong>🌟 Opportunité majeure:</strong> Marché en croissance forte (+78% d'ici 2030)</li>
+                        <li><strong>⚠️ Défi principal:</strong> Mélasma = pathologie chronique, taux de récidive élevé</li>
+                        <li><strong>💊 Gold standard:</strong> Triple thérapie (HQ + trétinoïne + cortico) - 65.6% succès</li>
+                        <li><strong>🚫 Contrainte réglementaire:</strong> Hydroquinone interdite en Europe (cosmétique)</li>
+                        <li><strong>✨ Innovation émergente:</strong> Thiamidol, Melasyl, Acide tranexamique</li>
                     </ul>
                 </div>
             </div>
 
-            <!-- RECOMMANDATION -->
-            <div id="recommandation" class="tab-content">
-                <h2 class="section-title">Recommandation Finale</h2>
-                
-                <div class="recommendation-box">
-                    <h3>🎯 Solution Recommandée : FLOWLITY</h3>
-                    <p style="font-size: 18px; line-height: 1.8; margin-top: 20px">
-                        Flowlity est l'APS idéal pour Bonsoirs car il combine parfaitement innovation technologique, 
-                        adaptabilité PME/ETI et puissance de l'IA dans un package accessible et rapide à déployer.
+            <div class="card">
+                <h2>🔬 Mécanismes Physiopathologiques</h2>
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <h3>☀️ Exposition UV</h3>
+                        <p>Stimulation excessive de la mélanogénèse → Production accrue de mélanine → Transfert vers kératinocytes</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h3>🔥 Inflammation Dermique</h3>
+                        <p>Activation fibroblastes → Production SCF → Stimulation récepteur c-kit → Surproduction mélanine</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h3>🩸 Composante Vasculaire</h3>
+                        <p>Prolifération vaisseaux → Surexpression VEGF → Signaux pro-mélanogéniques → Mélasma rebelle</p>
+                    </div>
+                    <div class="timeline-item">
+                        <h3>⚡ Hormones</h3>
+                        <p>Œstrogènes (grossesse, contraception) → Aggravation mélasma → Poussées estivales</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: MARCHÉ GLOBAL -->
+        <div id="market" class="section">
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h2>🌍 Répartition Géographique du Marché</h2>
+                    <div class="chart-container">
+                        <canvas id="geoChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>📊 Segmentation Client</h2>
+                    <div class="chart-container">
+                        <canvas id="segmentChart"></canvas>
+                    </div>
+                    <div style="margin-top: 20px;">
+                        <div class="tag">80% femmes teint mat/foncé</div>
+                        <div class="tag">Tous phototypes concernés</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🗺️ Heatmap: Intensité de Demande par Région</h2>
+                <div class="heatmap">
+                    <div class="heatmap-cell heat-very-high">
+                        <h3>Asie-Pacifique</h3>
+                        <p>Très forte demande</p>
+                        <p>50%+ du marché</p>
+                    </div>
+                    <div class="heatmap-cell heat-high">
+                        <h3>Afrique</h3>
+                        <p>Forte demande</p>
+                        <p>30-60% utilisent</p>
+                    </div>
+                    <div class="heatmap-cell heat-medium">
+                        <h3>Amérique du Nord</h3>
+                        <p>Demande moyenne</p>
+                        <p>Communautés ciblées</p>
+                    </div>
+                    <div class="heatmap-cell heat-low">
+                        <h3>Europe</h3>
+                        <p>Demande modérée</p>
+                        <p>Focus anti-âge</p>
+                    </div>
+                    <div class="heatmap-cell heat-medium">
+                        <h3>Moyen-Orient</h3>
+                        <p>Demande moyenne</p>
+                        <p>Marché structuré</p>
+                    </div>
+                    <div class="heatmap-cell heat-high">
+                        <h3>Amérique Latine</h3>
+                        <p>Forte demande</p>
+                        <p>Croissance rapide</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📈 Évolution des Tendances Marketing</h2>
+                <ul class="insights-list">
+                    <li><strong>Ancien:</strong> "Whitening" / "Éclaircissant" → <strong>Nouveau:</strong> "Brightening" / "Illuminateur"</li>
+                    <li><strong>Raison:</strong> Éviter connotations négatives du colorisme</li>
+                    <li><strong>Exemple:</strong> Fair & Lovely → Glow & Lovely (Unilever, 2020)</li>
+                    <li><strong>Positionnement:</strong> "Peau éclatante de santé" vs "Peau plus blanche"</li>
+                    <li><strong>Cible élargie:</strong> Taches de soleil + marques d'acné (pas seulement blanchiment)</li>
+                </ul>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h2>🎯 Top Recherches Google par Pays</h2>
+                    <div style="padding: 15px;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 95%;">Pakistan - 95%</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 88%;">Nigeria - 88%</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 85%;">Ghana - 85%</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 80%;">Inde - 80%</div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 75%;">Jamaïque - 75%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>⚖️ Maturité du Marché</h2>
+                    <div class="innovation-score">
+                        <span>Asie-Pacifique</span>
+                        <span style="font-size: 2em;">⭐⭐⭐⭐⭐</span>
+                    </div>
+                    <div class="innovation-score" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);">
+                        <span>Europe / USA</span>
+                        <span style="font-size: 2em;">⭐⭐⭐⭐</span>
+                    </div>
+                    <div class="innovation-score" style="background: linear-gradient(90deg, #fa709a 0%, #fee140 100%);">
+                        <span>Afrique</span>
+                        <span style="font-size: 2em;">⭐⭐⭐</span>
+                    </div>
+                    <p style="margin-top: 15px; font-size: 0.9em; color: #666;">
+                        <strong>Asie:</strong> Innovation constante, adoption large<br>
+                        <strong>Europe/USA:</strong> Marché médicalisé, haute technologie<br>
+                        <strong>Afrique:</strong> Transition vers produits sûrs et réglementés
                     </p>
-                    
-                    <div class="highlight">
-                        <h4 style="margin-bottom: 15px; font-size: 20px">Pourquoi Flowlity ?</h4>
-                        <ul style="list-style: none; padding: 0">
-                            <li style="margin-bottom: 12px; font-size: 16px">✅ <strong>AI-native</strong> : Conçu dès l'origine avec IA avancée (ML + prochainement GenAI)</li>
-                            <li style="margin-bottom: 12px; font-size: 16px">✅ <strong>Taille adaptée</strong> : PME/ETI en croissance rapide, pas de surdimensionnement</li>
-                            <li style="margin-bottom: 12px; font-size: 16px">✅ <strong>Déploiement rapide</strong> : Résultats tangibles en quelques semaines</li>
-                            <li style="margin-bottom: 12px; font-size: 16px">✅ <strong>Automatisation 95%</strong> : Libère l'équipe des tâches répétitives</li>
-                            <li style="margin-bottom: 12px; font-size: 16px">✅ <strong>Support français</strong> : Startup française avec accompagnement local</li>
-                            <li style="margin-bottom: 12px; font-size: 16px">✅ <strong>Cool Vendor Gartner 2025</strong> : Reconnaissance du marché</li>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: INNOVATIONS -->
+        <div id="innovation" class="section">
+            <div class="card">
+                <h2>💡 Timeline des Innovations Majeures</h2>
+                <div class="timeline">
+                    <div class="timeline-item priority-high">
+                        <h3>🏆 Thiamidol (Beiersdorf)</h3>
+                        <p><strong>Breakthrough:</strong> Criblage de 50 000 composés → Inhibiteur tyrosinase puissant (IC50 ~1 µM)</p>
+                        <p><strong>Performance:</strong> Plus efficace que hydroquinone, excellente tolérance</p>
+                        <p><strong>Résultats:</strong> Amélioration visible en 4 semaines, utilisation long cours sûre</p>
+                        <p><strong>Gamme:</strong> Eucerin Anti-Pigment (disponible grand public)</p>
+                        <div class="tag">2019</div>
+                        <div class="tag">Cosmétique</div>
+                    </div>
+
+                    <div class="timeline-item priority-high">
+                        <h3>⚡ Melasyl (L'Oréal)</h3>
+                        <p><strong>Développement:</strong> 18 ans de recherche, molécule multi-patentée</p>
+                        <p><strong>Cible:</strong> Désordres pigmentaires localisés (taches vieillesse, post-acné)</p>
+                        <p><strong>Performance:</strong> Uniformise teint même peaux foncées, efface marques persistantes</p>
+                        <p><strong>Gamme:</strong> La Roche-Posay Mela-B3, L'Oréal Paris, Vichy</p>
+                        <div class="tag">2023-2024</div>
+                        <div class="tag">Innovation majeure</div>
+                    </div>
+
+                    <div class="timeline-item priority-medium">
+                        <h3>💊 Acide Tranexamique</h3>
+                        <p><strong>Mécanisme:</strong> Antifibrinolytique → Réduit mastocytes dermiques + néo-vascularisation</p>
+                        <p><strong>Usage oral:</strong> 250-500 mg/jour pendant 3-6 mois pour mélasmas modérés à sévères</p>
+                        <p><strong>Usage topique:</strong> 5% en crème, blocage communications pro-mélanine</p>
+                        <p><strong>Résultats:</strong> Amélioration notable même cas rebelles, mais récidive à l'arrêt</p>
+                        <div class="tag">Hors AMM</div>
+                        <div class="tag">Surveillance médicale</div>
+                    </div>
+
+                    <div class="timeline-item priority-medium">
+                        <h3>🧪 4MSK Enhanced (Shiseido)</h3>
+                        <p><strong>Innovation:</strong> Technologie "ionic liquid" avec bétaïne</p>
+                        <p><strong>Performance:</strong> Pénétration 2x plus profonde qu'avant</p>
+                        <p><strong>Double action:</strong> Inhibe mélanogénèse + Accélère exfoliation pigment</p>
+                        <p><strong>Résultat:</strong> Atténuation plus rapide des taches existantes</p>
+                        <div class="tag">2025</div>
+                        <div class="tag">Galénique avancée</div>
+                    </div>
+
+                    <div class="timeline-item priority-medium">
+                        <h3>🌿 Melasolv (AmorePacific)</h3>
+                        <p><strong>Mécanisme unique:</strong> Réprime expression tyrosinase (vs blocage direct)</p>
+                        <p><strong>Avantage:</strong> Évite dépigmentation excessive, plus sûr que phénols classiques</p>
+                        <p><strong>Bonus:</strong> Action sur hyperpigmentation liée à pollution (particules fines)</p>
+                        <p><strong>Formulation:</strong> Nanovecteurs/liposomes pour stabilité et pénétration optimales</p>
+                        <div class="tag">K-Beauty</div>
+                        <div class="tag">Anti-pollution</div>
+                    </div>
+
+                    <div class="timeline-item priority-low">
+                        <h3>🔬 Extraits Botaniques Anti-VEGF (Shiseido)</h3>
+                        <p><strong>Tormentilla:</strong> Inhibe production VEGF-A par kératinocytes irradiés</p>
+                        <p><strong>Pyrola incarnata:</strong> Bloque stimulation mélanine par cellules endothéliales UV-induites</p>
+                        <p><strong>Approche:</strong> Ciblage inflammation + vascularisation (pas seulement mélanine)</p>
+                        <div class="tag">Multi-cible</div>
+                        <div class="tag">Naturel</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h2>🎯 Nouvelles Cibles Thérapeutiques</h2>
+                    <div class="chart-container">
+                        <canvas id="targetsChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🔬 Technologies Émergentes</h2>
+                    <ul class="insights-list">
+                        <li><strong>🤖 IA:</strong> Analyse temps réel images peau, quantification taches, routines personnalisées</li>
+                        <li><strong>🧬 Skin equivalents:</strong> Modèles peau reconstruite pigmentée pour tests rapides</li>
+                        <li><strong>💡 Photopharmacologie:</strong> Molécules activables par lumière laser (ciblage spatial précis)</li>
+                        <li><strong>📱 Applications mobiles:</strong> Couplage appareils mesure + recommandations adaptées</li>
+                        <li><strong>🔬 Nanovecteurs:</strong> Liposomes encapsulant actifs pour biodisponibilité maximale</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>⚗️ Comparatif des Actifs Dépigmentants</h2>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <tr>
+                            <th style="padding: 15px; text-align: left;">Actif</th>
+                            <th style="padding: 15px;">Efficacité</th>
+                            <th style="padding: 15px;">Sécurité</th>
+                            <th style="padding: 15px;">Rapidité</th>
+                            <th style="padding: 15px;">Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: #f5f5f5;">
+                            <td style="padding: 12px;"><strong>Hydroquinone 4%</strong></td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                            <td style="padding: 12px;"><span class="tag" style="background: #f44336;">Interdit EU</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px;"><strong>Thiamidol</strong></td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐</td>
+                            <td style="padding: 12px;"><span class="tag" style="background: #4caf50;">Cosmétique</span></td>
+                        </tr>
+                        <tr style="background: #f5f5f5;">
+                            <td style="padding: 12px;"><strong>Melasyl</strong></td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐</td>
+                            <td style="padding: 12px;"><span class="tag" style="background: #4caf50;">Cosmétique</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px;"><strong>Acide Tranexamique oral</strong></td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐</td>
+                            <td style="padding: 12px;"><span class="tag" style="background: #ff9800;">Hors AMM</span></td>
+                        </tr>
+                        <tr style="background: #f5f5f5;">
+                            <td style="padding: 12px;"><strong>Acide Azélaïque 20%</strong></td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐</td>
+                            <td style="padding: 12px;"><span class="tag" style="background: #4caf50;">Prescription</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px;"><strong>Vitamine C</strong></td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐</td>
+                            <td style="padding: 12px;"><span class="tag" style="background: #4caf50;">Cosmétique</span></td>
+                        </tr>
+                        <tr style="background: #f5f5f5;">
+                            <td style="padding: 12px;"><strong>Niacinamide</strong></td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐</td>
+                            <td style="padding: 12px;"><span class="tag" style="background: #4caf50;">Cosmétique</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SECTION 4: CONCURRENCE -->
+        <div id="competition" class="section">
+            <div class="card">
+                <h2>🏆 Mapping Concurrentiel</h2>
+                <div class="competitor-card">
+                    <h3>L'Oréal (Leader mondial)</h3>
+                    <p><strong>Atouts:</strong> Melasyl (18 ans R&D), Mexoryl 400 UVA, multi-marques (La Roche-Posay, Vichy, Lancôme)</p>
+                    <p><strong>Positionnement:</strong> Premium + Pharmacie, base scientifique forte</p>
+                    <p><strong>Innovation récente:</strong> Mela-B3 serum, expansion Vichy/L'Oréal Paris avec Melasyl</p>
+                    <div class="tag">Budget R&D: +++</div>
+                    <div class="tag">Couverture globale</div>
+                </div>
+
+                <div class="competitor-card" style="background: linear-gradient(135deg, #fad0c4 0%, #ffd1ff 100%);">
+                    <h3>Beiersdorf (Eucerin)</h3>
+                    <p><strong>Atouts:</strong> Thiamidol (criblage 50k composés), efficacité prouvée > HQ, excellent profil sécurité</p>
+                    <p><strong>Positionnement:</strong> Pharmacie, validation dermatologique forte</p>
+                    <p><strong>Gamme:</strong> Anti-Pigment (sérum + crème SPF), adoption dermatos</p>
+                    <div class="tag">Innovation majeure</div>
+                    <div class="tag">OTC Europe</div>
+                </div>
+
+                <div class="competitor-card" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                    <h3>Shiseido (Leader Asie)</h3>
+                    <p><strong>Atouts:</strong> 4MSK ionic liquid (pénétration 2x), extraits anti-VEGF, m-Tranexamic Acid (années 80)</p>
+                    <p><strong>Positionnement:</strong> Premium, haute technologie galénique</p>
+                    <p><strong>Gamme historique:</strong> White Lucent, Ultimune, recherche inflammation/vascularisation</p>
+                    <div class="tag">Pionnier Japon</div>
+                    <div class="tag">Expertise galénique</div>
+                </div>
+
+                <div class="competitor-card" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+                    <h3>AmorePacific (K-Beauty)</h3>
+                    <p><strong>Atouts:</strong> Melasolv (réprime expression tyrosinase), nanovecteurs, action anti-pollution</p>
+                    <p><strong>Positionnement:</strong> Innovation K-Beauty, sérums/masques éclaircissants</p>
+                    <p><strong>Marques:</strong> Sulwhasoo, Laneige - popularité mondiale K-Beauty</p>
+                    <div class="tag">Alternative HQ sûre</div>
+                    <div class="tag">Trend K-Beauty</div>
+                </div>
+
+                <div class="competitor-card" style="background: linear-gradient(135deg, #d4fc79 0%, #96e6a1 100%);">
+                    <h3>Galderma</h3>
+                    <p><strong>Atouts:</strong> Skinoren (azélaïque), Tri-Luma USA (triple thérapie), expertise dermatologique</p>
+                    <p><strong>Positionnement:</strong> Prescription, solutions médicales</p>
+                    <div class="tag">Dermato pure-player</div>
+                </div>
+
+                <div class="competitor-card" style="background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);">
+                    <h3>Marques émergentes (Topicals, The Ordinary, etc.)</h3>
+                    <p><strong>Atouts:</strong> Formules transparentes, multi-actifs (tranexamique + niacinamide + azélaïque), communauté forte</p>
+                    <p><strong>Positionnement:</strong> Direct-to-consumer, prix accessibles, éducation consommateur</p>
+                    <p><strong>Cible:</strong> Millennials/Gen Z, peaux noires et asiatiques</p>
+                    <div class="tag">D2C</div>
+                    <div class="tag">Social media</div>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h2>📊 Parts de Marché Estimées</h2>
+                    <div class="chart-container">
+                        <canvas id="marketShareChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h2>🔬 Budget R&D Investissement</h2>
+                    <div class="chart-container">
+                        <canvas id="rdBudgetChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>⚡ Avantages Concurrentiels Clés</h2>
+                <div class="swot-grid">
+                    <div class="swot-card swot-strengths">
+                        <h3>💪 L'Oréal</h3>
+                        <ul>
+                            <li>18 ans R&D Melasyl</li>
+                            <li>Multi-marques (masstige → luxury)</li>
+                            <li>Distribution mondiale massive</li>
+                            <li>Pipeline innovation fort</li>
+                        </ul>
+                    </div>
+                    <div class="swot-card swot-opportunities">
+                        <h3>🎯 Beiersdorf</h3>
+                        <ul>
+                            <li>Thiamidol: alternative HQ validée</li>
+                            <li>Adoption dermatologues rapide</li>
+                            <li>Profil sécurité excellent</li>
+                            <li>Pharmacie mainstream</li>
+                        </ul>
+                    </div>
+                    <div class="swot-card swot-strengths">
+                        <h3>🌟 Shiseido</h3>
+                        <ul>
+                            <li>Pionnier historique (années 80)</li>
+                            <li>Expertise galénique de pointe</li>
+                            <li>Leadership Asie-Pacifique</li>
+                            <li>Recherche multi-cible avancée</li>
+                        </ul>
+                    </div>
+                    <div class="swot-card swot-opportunities">
+                        <h3>🚀 Émergents</h3>
+                        <ul>
+                            <li>Agilité / innovation rapide</li>
+                            <li>Communauté engagée</li>
+                            <li>Prix accessibles</li>
+                            <li>Formules transparentes</li>
                         </ul>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <div style="margin-top: 40px">
-                    <h3 style="color: #1a2332; margin-bottom: 25px; font-size: 24px">Bénéfices Attendus</h3>
-                    
-                    <div class="metrics-grid">
-                        <div class="metric-card">
-                            <div class="metric-value">-60%</div>
-                            <div class="metric-label">Réduction stock possible</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-value">+70%</div>
-                            <div class="metric-label">Gain temps planning</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-value">-30%</div>
-                            <div class="metric-label">Erreur prévision</div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-value">95%</div>
-                            <div class="metric-label">Tâches automatisées</div>
-                        </div>
+        <!-- SECTION 5: STRATÉGIE ACM -->
+        <div id="strategy" class="section">
+            <div class="card">
+                <h2>🎯 Recommandations Stratégiques pour ACM</h2>
+
+                <div class="recommendation-box priority-high">
+                    <h3>🔴 PRIORITÉ 1: Développer un actif propriétaire innovant</h3>
+                    <p><strong>Rationale:</strong> Thiamidol et Melasyl prouvent qu'un ingrédient signature = différenciation majeure</p>
+                    <p><strong>Approche:</strong></p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>Criblage moléculaire ciblé sur nouvelles cibles (VEGF, inflammation, transfert mélanosomes)</li>
+                        <li>Approche multi-cible: inhibition tyrosinase + anti-inflammatoire + anti-vasculaire</li>
+                        <li>Focus sécurité long terme (utilisation > 6 mois sans risques)</li>
+                        <li>Tests cliniques robustes sur phototypes IV-VI (marché prioritaire)</li>
+                    </ul>
+                    <p><strong>Timeline:</strong> 3-5 ans R&D → Brevet → Lancement</p>
+                    <p><strong>Budget estimé:</strong> €5-10M R&D</p>
+                </div>
+
+                <div class="recommendation-box priority-high">
+                    <h3>🔴 PRIORITÉ 2: Formulation galénique avancée</h3>
+                    <p><strong>Opportunité:</strong> Shiseido montre que la galénique = avantage compétitif majeur</p>
+                    <p><strong>Actions:</strong></p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>Développer système vectorisation (liposomes, nanovecteurs) pour pénétration optimale</li>
+                        <li>Technologie "ionic liquid" ou équivalent pour maintenir actifs stables + biodisponibles</li>
+                        <li>Textures sensorielles premium (absorption rapide, fini mat/satiné)</li>
+                        <li>Protection lumière visible (écrans teintés, filtres anti-lumière bleue)</li>
+                    </ul>
+                    <p><strong>Avantage:</strong> Maximiser efficacité actifs existants sans augmenter concentrations</p>
+                </div>
+
+                <div class="recommendation-box priority-high">
+                    <h3>🟠 PRIORITÉ 3: Ciblage géographique stratégique</h3>
+                    <p><strong>Marché primaire:</strong> Asie-Pacifique (50% marché mondial, forte demande, maturité élevée)</p>
+                    <p><strong>Stratégie:</strong></p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li><strong>Chine:</strong> Partenariats distributeurs locaux, adaptation formules climat humide</li>
+                        <li><strong>Corée:</strong> Positionnement premium, collaboration K-Beauty influenceurs</li>
+                        <li><strong>Japon:</strong> Validation dermatologique, quasi-drug approval si possible</li>
+                        <li><strong>Inde:</strong> Gamme accessible (price point €15-30), focus HPI post-acné</li>
+                    </ul>
+                    <p><strong>Marché secondaire:</strong> Moyen-Orient + Afrique du Nord (forte prévalence mélasma, pouvoir d'achat)</p>
+                </div>
+
+                <div class="recommendation-box priority-medium">
+                    <h3>🟡 PRIORITÉ 4: Gamme différenciée par besoin</h3>
+                    <p><strong>Produit 1:</strong> Sérum intensif mélasma rebelle (actif propriétaire + tranexamique topique + niacinamide)</p>
+                    <p><strong>Produit 2:</strong> Crème quotidienne HPI post-acné peaux noires (azélaïque + actif propriétaire + apaisant)</p>
+                    <p><strong>Produit 3:</strong> Booster éclat lentigos solaires (vitamine C stabilisée + actif propriétaire + AHA légers)</p>
+                    <p><strong>Produit 4:</strong> SPF 50+ teinté anti-récidive (UVA/UVB/lumière visible + entretien dépigmentation)</p>
+                    <p><strong>Positionnement:</strong> Solutions spécialisées (vs produits "one-size-fits-all")</p>
+                </div>
+
+                <div class="recommendation-box priority-medium">
+                    <h3>🟡 PRIORITÉ 5: Validation clinique & communication scientifique</h3>
+                    <p><strong>Crédibilité = clé du succès en pharmacie</strong></p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>Études cliniques comparatives vs gold standards (HQ, triple thérapie, thiamidol)</li>
+                        <li>Publications revues dermatologiques peer-reviewed</li>
+                        <li>Présentations congrès (AAD, EADV, World Congress Dermatology)</li>
+                        <li>Programme formation dermatologues/pharmaciens</li>
+                        <li>Données chiffrées transparentes (% amélioration à 4-12 semaines)</li>
+                    </ul>
+                    <p><strong>Message:</strong> "Efficacité clinique prouvée + Sécurité long terme"</p>
+                </div>
+
+                <div class="recommendation-box priority-low">
+                    <h3>🟢 PRIORITÉ 6: Marketing digital & éducation consommateur</h3>
+                    <p><strong>Opportunité:</strong> Émergents (Topicals) montrent le pouvoir des communautés en ligne</p>
+                    <ul style="margin: 10px 0 10px 20px;">
+                        <li>Contenu éducatif: Blog/YouTube expliquant mécanismes, actifs, routines</li>
+                        <li>Partenariats dermatologues influenceurs (Instagram, TikTok)</li>
+                        <li>Application mobile: diagnostic taches + routine personnalisée + suivi progrès</li>
+                        <li>Avant/après authentiques (diversité phototypes)</li>
+                        <li>Transparence composition (% actifs, CoA disponibles)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h2>💰 Analyse d'Opportunité de Marché</h2>
+                    <div class="key-metric">
+                        <div class="key-metric-value">€850M</div>
+                        <div class="key-metric-label">TAM Europe Hyperpigmentation</div>
+                    </div>
+                    <div class="key-metric" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <div class="key-metric-value">€4,4 Mds</div>
+                        <div class="key-metric-label">TAM Asie-Pacifique</div>
+                    </div>
+                    <div class="key-metric" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                        <div class="key-metric-value">1%</div>
+                        <div class="key-metric-label">Part de marché cible réaliste → €85M CA</div>
                     </div>
                 </div>
 
-                <div style="margin-top: 40px; background: #f8f9fa; padding: 30px; border-radius: 15px">
-                    <h3 style="color: #1a2332; margin-bottom: 20px">Plan de Mise en Œuvre</h3>
-                    
+                <div class="card">
+                    <h2>⏱️ Roadmap Stratégique</h2>
                     <div class="timeline">
-                        <div class="timeline-item">
-                            <div class="timeline-marker">1</div>
-                            <div class="timeline-content">
-                                <h4>Phase 1 : Cadrage (2 semaines)</h4>
-                                <p>Définition des besoins précis avec consultant, audit des données existantes, préparation des intégrations ERP/Winddle</p>
-                            </div>
+                        <div class="timeline-item" style="border-color: #f5576c;">
+                            <h3>Phase 1: R&D (Années 1-3)</h3>
+                            <p>Développement actif propriétaire + formulation galénique + études précliniques</p>
                         </div>
-                        <div class="timeline-item">
-                            <div class="timeline-marker">2</div>
-                            <div class="timeline-content">
-                                <h4>Phase 2 : Déploiement (4-6 semaines)</h4>
-                                <p>Configuration Flowlity, intégration données, paramétrage algorithmes IA, formation équipe</p>
-                            </div>
+                        <div class="timeline-item" style="border-color: #ff9800;">
+                            <h3>Phase 2: Validation (Années 3-5)</h3>
+                            <p>Essais cliniques multi-centres + publications + dossier réglementaire</p>
                         </div>
-                        <div class="timeline-item">
-                            <div class="timeline-marker">3</div>
-                            <div class="timeline-content">
-                                <h4>Phase 3 : Optimisation (continu)</h4>
-                                <p>Ajustements fins, apprentissage IA, extension progressive du périmètre, mesure des KPIs</p>
-                            </div>
+                        <div class="timeline-item" style="border-color: #4caf50;">
+                            <h3>Phase 3: Lancement (Année 5-6)</h3>
+                            <p>Lancement Europe + Formation dermatos/pharmaciens + Digital marketing</p>
+                        </div>
+                        <div class="timeline-item" style="border-color: #2196f3;">
+                            <h3>Phase 4: Expansion (Année 6-10)</h3>
+                            <p>Déploiement Asie-Pacifique + Extension gamme + Acquisitions croissance externe</p>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div style="margin-top: 40px; padding: 30px; background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); border-radius: 15px; color: white">
-                    <h3 style="margin-bottom: 20px; font-size: 24px">🚀 Prochaines Étapes</h3>
-                    <ol style="font-size: 16px; line-height: 2; padding-left: 25px">
-                        <li>Contacter Flowlity pour une démo personnalisée</li>
-                        <li>Évaluer l'intégration avec Winddle (complémentarité)</li>
-                        <li>Définir le périmètre pilote (gamme de produits test)</li>
-                        <li>Planifier la formation de l'équipe Supply Chain</li>
-                        <li>Établir les KPIs de succès et le budget projet</li>
-                    </ol>
+            <div class="card">
+                <h2>⚖️ Analyse SWOT pour ACM</h2>
+                <div class="swot-grid">
+                    <div class="swot-card swot-strengths">
+                        <h3>💪 Forces</h3>
+                        <ul>
+                            <li>Expertise dermatologique établie</li>
+                            <li>Réseau pharmacies européennes</li>
+                            <li>Laboratoire R&D opérationnel</li>
+                            <li>Image scientifique crédible</li>
+                            <li>Flexibilité PME (agilité vs géants)</li>
+                        </ul>
+                    </div>
+                    <div class="swot-card swot-weaknesses">
+                        <h3>⚠️ Faiblesses</h3>
+                        <ul>
+                            <li>Notoriété limitée vs L'Oréal/Shiseido</li>
+                            <li>Budget R&D < concurrents</li>
+                            <li>Absence actif signature reconnu</li>
+                            <li>Distribution Asie-Pacifique absente</li>
+                            <li>Présence digital/social média faible</li>
+                        </ul>
+                    </div>
+                    <div class="swot-card swot-opportunities">
+                        <h3>🌟 Opportunités</h3>
+                        <ul>
+                            <li>Marché +78% d'ici 2030</li>
+                            <li>Interdiction HQ = besoin alternatives</li>
+                            <li>Peaux foncées sous-servies Europe</li>
+                            <li>Mélasma rebelle = niche premium</li>
+                            <li>Transparence/clean beauty tendance</li>
+                            <li>Télémédecine dermatologique croissante</li>
+                        </ul>
+                    </div>
+                    <div class="swot-card swot-threats">
+                        <h3>⚡ Menaces</h3>
+                        <ul>
+                            <li>Concurrence intense (géants + émergents)</li>
+                            <li>Thiamidol/Melasyl déjà établis</li>
+                            <li>Réglementation stricte Europe</li>
+                            <li>Produits illégaux (mercure) brouillent marché</li>
+                            <li>Attentes consommateurs élevées (résultats rapides)</li>
+                        </ul>
+                    </div>
                 </div>
+            </div>
+
+            <div class="card">
+                <h2>🎯 Positionnement Stratégique Recommandé</h2>
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 15px; text-align: center;">
+                    <h3 style="font-size: 1.8em; margin-bottom: 20px; color: white;">« Le spécialiste européen des hyperpigmentations rebelles »</h3>
+                    <p style="font-size: 1.2em; line-height: 1.6;">
+                        <strong>Promesse:</strong> Solutions scientifiquement validées pour les cas résistants (mélasma récidivant, HPI peaux foncées)<br>
+                        <strong>Différenciation:</strong> Actif propriétaire multi-cible + Galénique avancée + Expertise dermatologique<br>
+                        <strong>Circuit:</strong> Prescription dermato + Conseil pharmacien (pas grande distribution)<br>
+                        <strong>Prix:</strong> Premium justifié (€40-60 produit) par efficacité clinique<br>
+                        <strong>Extension:</strong> Leader Europe → Expansion Asie via partenariats
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 6: ANALYSE RÉGIONALE -->
+        <div id="regions" class="section">
+            <div class="card">
+                <h2>🌏 Asie-Pacifique: Le Marché Prioritaire</h2>
+                <div class="stat-box">
+                    <div class="stat-label">Part du marché mondial</div>
+                    <div class="stat-number">>50%</div>
+                </div>
+                <h3 style="margin: 20px 0 10px 0; color: #2a5298;">Caractéristiques</h3>
+                <ul class="insights-list">
+                    <li><strong>Maturité:</strong> ⭐⭐⭐⭐⭐ Innovation constante, consommatrices éduquées</li>
+                    <li><strong>Japon:</strong> Pionnier régulation (quasi-drugs années 80), tranexamique approuvé cosmétique</li>
+                    <li><strong>Corée:</strong> K-Beauty mondiale, routines multilayers, sérums/essences/masques</li>
+                    <li><strong>Chine:</strong> Classe moyenne massive, croissance forte, marques locales + importations</li>
+                    <li><strong>Prix accepté:</strong> €30-100+ pour produits premium haute technologie</li>
+                </ul>
+                <h3 style="margin: 20px 0 10px 0; color: #2a5298;">Leaders Régionaux</h3>
+                <p>Shiseido (4MSK, White Lucent), AmorePacific (Melasolv, Sulwhasoo), SK-II, Sulwhasoo</p>
+                <h3 style="margin: 20px 0 10px 0; color: #2a5298;">Recommandation ACM</h3>
+                <div class="recommendation-box">
+                    <p>✅ Partenariat distributeur Chine (Tmall, JD.com)</p>
+                    <p>✅ Collaboration KOL beauté Corée (Instagram/YouTube)</p>
+                    <p>✅ Positionnement "European expertise" (prestige occidental valorisé)</p>
+                    <p>✅ Adaptation textures (climat humide, absorption rapide)</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🇪🇺 Europe: Marché Réglementé & Mature</h2>
+                <h3 style="margin: 20px 0 10px 0; color: #2a5298;">Caractéristiques</h3>
+                <ul class="insights-list">
+                    <li><strong>Maturité:</strong> ⭐⭐⭐⭐ Haute technologie, marché médicalisé</li>
+                    <li><strong>Focus:</strong> Anti-âge + taches soleil (vs blanchiment global)</li>
+                    <li><strong>Réglementation:</strong> La plus stricte mondiale (HQ interdite 2001, mercure banni)</li>
+                    <li><strong>Circuit:</strong> Pharmacie dominante (La Roche-Posay, Vichy, Bioderma, Caudalie)</li>
+                    <li><strong>Consommateurs:</strong> Exigent preuves cliniques, liste INCI transparente</li>
+                </ul>
+                <h3 style="margin: 20px 0 10px 0; color: #2a5298;">Opportunité Spécifique</h3>
+                <div class="recommendation-box">
+                    <p><strong>Peaux foncées sous-servies:</strong> Communautés africaines/moyen-orientales en Europe</p>
+                    <p><strong>Besoin:</strong> Solutions HPI post-acné, mélasma peaux mates, alternatives HQ sûres</p>
+                    <p><strong>Positionnement ACM:</strong> "Spécialiste phototypes IV-VI en Europe"</p>
+                </div>
+            </div>
+
+            <div class="dashboard-grid">
+                <div class="card">
+                    <h2>🇺🇸 Amérique du Nord</h2>
+                    <h3 style="color: #2a5298;">Caractéristiques</h3>
+                    <ul class="insights-list">
+                        <li><strong>Diversité ethnique:</strong> Afro-américains, latinos, asiatiques + caucasiens</li>
+                        <li><strong>Réglementation:</strong> HQ <2% était OTC, maintenant prescription seule (FDA 2020)</li>
+                        <li><strong>Cosmeceutiques:</strong> Segment fort (SkinCeuticals, Obagi, PCA Skin, Murad)</li>
+                        <li><strong>Transparence:</strong> The Ordinary = succès (formules brutes, prix bas, INCI claire)</li>
+                    </ul>
+                    <h3 style="color: #2a5298;">Recommandation ACM</h3>
+                    <p>⚠️ Marché secondaire (concurrence intense, barrières entrée élevées)</p>
+                    <p>✅ Si expansion: Positionnement "European science" premium via Dermstore/Sephora</p>
+                </div>
+
+                <div class="card">
+                    <h2>🌍 Afrique & Moyen-Orient</h2>
+                    <h3 style="color: #2a5298;">Caractéristiques</h3>
+                    <ul class="insights-list">
+                        <li><strong>Demande:</strong> Très forte (30-60% femmes utilisent éclaircissants)</li>
+                        <li><strong>Problème:</strong> Marché pollué produits dangereux (mercure, stéroïdes)</li>
+                        <li><strong>Interdictions:</strong> Ghana, Rwanda, Afrique du Sud bannissent HQ/mercure</li>
+                        <li><strong>Besoin:</strong> Alternatives sûres et réglementées, éducation santé</li>
+                    </ul>
+                    <h3 style="color: #2a5298;">Recommandation ACM</h3>
+                    <p>✅ Opportunité sociale + business: Offrir produits sûrs accessibles (€20-40)</p>
+                    <p>✅ Partenariats pharmacies Afrique du Nord / Afrique du Sud</p>
+                    <p>✅ Campagnes éducation risques mercure/corticoïdes</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🗺️ Matrice de Priorisation Géographique ACM</h2>
+                <table style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                    <thead style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                        <tr>
+                            <th style="padding: 15px; text-align: left;">Région</th>
+                            <th style="padding: 15px;">Taille Marché</th>
+                            <th style="padding: 15px;">Accessibilité ACM</th>
+                            <th style="padding: 15px;">Concurrence</th>
+                            <th style="padding: 15px;">Priorité</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="background: #f1f8f4;">
+                            <td style="padding: 12px;"><strong>Europe Ouest</strong></td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐</td>
+                            <td style="padding: 12px;"><span class="tag" style="background: #4caf50;">🟢 P1</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px;"><strong>Asie-Pacifique</strong></td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                            <td style="padding: 12px;"><span class="tag" style="background: #4caf50;">🟢 P1</span></td>
+                        </tr>
+                        <tr style="background: #fffaf0;">
+                            <td style="padding: 12px;"><strong>Moyen-Orient / Afr. Nord</strong></td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐</td>
+                            <td style="padding: 12px;"><span class="tag" style="background: #ff9800;">🟠 P2</span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 12px;"><strong>Afrique Subsaharienne</strong></td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐</td>
+                            <td style="padding: 12px;"><span class="tag" style="background: #ff9800;">🟠 P2</span></td>
+                        </tr>
+                        <tr style="background: #fff5f5;">
+                            <td style="padding: 12px;"><strong>Amérique du Nord</strong></td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐</td>
+                            <td style="padding: 12px; text-align: center;">⭐⭐⭐⭐⭐</td>
+                            <td style="padding: 12px;"><span class="tag" style="background: #f44336;">🔴 P3</span></td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 
     <script>
-        function showTab(tabName) {
-            // Masquer tous les contenus
-            const contents = document.querySelectorAll('.tab-content');
-            contents.forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            // Désactiver tous les boutons
-            const tabs = document.querySelectorAll('.nav-tab');
-            tabs.forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // Activer le contenu sélectionné
-            document.getElementById(tabName).classList.add('active');
-            
-            // Activer le bouton correspondant
+        // NAVIGATION
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
             event.target.classList.add('active');
-            
-            // Scroll vers le haut
-            window.scrollTo({top: 0, behavior: 'smooth'});
         }
-    </script>
 
-</body></html>
+        // CHART 1: Types d'Hyperpigmentation
+        const typesCtx = document.getElementById('typesChart').getContext('2d');
+        new Chart(typesCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Mélasma', 'Lentigos Solaires', 'HPI Post-Acné', 'HPI Post-Inflammatoire', 'Autres'],
+                datasets: [{
+                    data: [35, 25, 20, 15, 5],
+                    backgroundColor: [
+                        '#f5576c',
+                        '#ffa500',
+                        '#667eea',
+                        '#764ba2',
+                        '#95a5a6'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { size: 12 }
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Répartition des cas d\'hyperpigmentation'
+                    }
+                }
+            }
+        });
+
+        // CHART 2: Répartition Géographique
+        const geoCtx = document.getElementById('geoChart').getContext('2d');
+        new Chart(geoCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Asie-Pacifique', 'Afrique', 'Amérique Nord', 'Europe', 'Moyen-Orient', 'Am. Latine'],
+                datasets: [{
+                    label: 'Part de marché (%)',
+                    data: [52, 18, 12, 9, 5, 4],
+                    backgroundColor: [
+                        '#f5576c',
+                        '#ffa500',
+                        '#667eea',
+                        '#764ba2',
+                        '#4caf50',
+                        '#2196f3'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    title: {
+                        display: true,
+                        text: 'Marché mondial par région (2022)'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 60
+                    }
+                }
+            }
+        });
+
+        // CHART 3: Segmentation Client
+        const segmentCtx = document.getElementById('segmentChart').getContext('2d');
+        new Chart(segmentCtx, {
+            type: 'pie',
+            data: {
+                labels: ['Femmes teint mat/foncé', 'Femmes teint clair', 'Hommes', 'Autres'],
+                datasets: [{
+                    data: [65, 20, 10, 5],
+                    backgroundColor: ['#f093fb', '#f5576c', '#667eea', '#95a5a6']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { font: { size: 12 } }
+                    }
+                }
+            }
+        });
+
+        // CHART 4: Nouvelles Cibles Thérapeutiques
+        const targetsCtx = document.getElementById('targetsChart').getContext('2d');
+        new Chart(targetsCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Tyrosinase', 'Inflammation', 'VEGF/Vascularisation', 'Transfert Mélanosomes', 'SCF/c-kit', 'Exfoliation'],
+                datasets: [{
+                    label: 'Approche Classique (HQ)',
+                    data: [95, 20, 10, 30, 15, 40],
+                    borderColor: '#f5576c',
+                    backgroundColor: 'rgba(245, 87, 108, 0.2)'
+                }, {
+                    label: 'Approche Multi-Cible Moderne',
+                    data: [85, 75, 70, 80, 65, 75],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.2)'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+
+        // CHART 5: Parts de Marché
+        const marketShareCtx = document.getElementById('marketShareChart').getContext('2d');
+        new Chart(marketShareCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['L\'Oréal', 'Shiseido', 'Beiersdorf', 'AmorePacific', 'Galderma', 'Autres'],
+                datasets: [{
+                    data: [22, 15, 12, 10, 6, 35],
+                    backgroundColor: ['#f5576c', '#ffa500', '#667eea', '#764ba2', '#4caf50', '#95a5a6']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom' },
+                    title: {
+                        display: true,
+                        text: 'Parts de marché estimées (2024)'
+                    }
+                }
+            }
+        });
+
+        // CHART 6: Budget R&D
+        const rdBudgetCtx = document.getElementById('rdBudgetChart').getContext('2d');
+        new Chart(rdBudgetCtx, {
+            type: 'bar',
+            data: {
+                labels: ['L\'Oréal', 'Shiseido', 'Beiersdorf', 'AmorePacific', 'Galderma'],
+                datasets: [{
+                    label: 'Budget R&D Annuel (M€)',
+                    data: [1000, 300, 200, 180, 120],
+                    backgroundColor: ['#f5576c', '#ffa500', '#667eea', '#764ba2', '#4caf50']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Animation au scroll
+        const cards = document.querySelectorAll('.card');
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        cards.forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.6s ease';
+            observer.observe(card);
+        });
+    </script>
+</body>
+</html>
